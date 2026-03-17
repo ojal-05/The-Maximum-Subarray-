@@ -1,0 +1,86 @@
+import java.io.*;
+import java.util.*;
+import java.util.stream.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
+class Result {
+
+    /*
+     * Complete the 'maxSubarray' function below.
+     *
+     * The function is expected to return an INTEGER_ARRAY.
+     * The function accepts INTEGER_ARRAY arr as parameter.
+     */
+    public static List<Integer> maxSubarray(List<Integer> arr) {
+        // 1. Calculate Maximum Subarray Sum (Kadane's Algorithm)
+        int maxSoFar = arr.get(0);
+        int currentMax = arr.get(0);
+        
+        // 2. Calculate Maximum Subsequence Sum
+        // If there's at least one positive number, sum all positives.
+        // If all numbers are negative, the "max" is the single largest element.
+        int maxSubsequence = 0;
+        int maxElement = arr.get(0);
+        boolean hasPositive = false;
+
+        for (int i = 0; i < arr.size(); i++) {
+            int num = arr.get(i);
+            
+            // Kadane's logic (starting from index 1 for the loop, but logic works here)
+            if (i > 0) {
+                currentMax = Math.max(num, currentMax + num);
+                maxSoFar = Math.max(maxSoFar, currentMax);
+            }
+
+            // Subsequence logic
+            if (num > 0) {
+                maxSubsequence += num;
+                hasPositive = true;
+            }
+            if (num > maxElement) {
+                maxElement = num;
+            }
+        }
+
+        // Final check for subsequence: if no positives, pick the best negative
+        if (!hasPositive) {
+            maxSubsequence = maxElement;
+        }
+
+        return Arrays.asList(maxSoFar, maxSubsequence);
+    }
+}
+
+public class Solution {
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(System.getenv("OUTPUT_PATH")));
+
+        int t = Integer.parseInt(bufferedReader.readLine().trim());
+
+        IntStream.range(0, t).forEach(tItr -> {
+            try {
+                int n = Integer.parseInt(bufferedReader.readLine().trim());
+
+                List<Integer> arr = Stream.of(bufferedReader.readLine().replaceAll("\\s+$", "").split(" "))
+                    .map(Integer::parseInt)
+                    .collect(toList());
+
+                List<Integer> result = Result.maxSubarray(arr);
+
+                bufferedWriter.write(
+                    result.stream()
+                        .map(Object::toString)
+                        .collect(joining(" "))
+                    + "\n"
+                );
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        bufferedReader.close();
+        bufferedWriter.close();
+    }
+}
